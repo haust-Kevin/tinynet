@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libtinynet_net.a  CMakeFiles/tinynet_net.dir/SocketsOps.cc.o CMakeFiles/tinynet_net.dir/InetAddress.cc.o CMakeFiles/tinynet_net.dir/Socket.cc.o
+/usr/bin/ranlib ../../lib/libtinynet_net.a

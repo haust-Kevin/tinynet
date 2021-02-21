@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/thread_test.dir/Thread_test.cc.o  -o ../../../bin/thread_test ../../../lib/libtinynet_base.a -lpthread 

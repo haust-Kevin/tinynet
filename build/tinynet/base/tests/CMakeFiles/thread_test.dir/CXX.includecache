@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+..//tinynet/base/Thread.h
+tinynet/base/utils.h
+../tinynet/base/tinynet/base/utils.h
+functional
+-
+thread
+-
+
+..//tinynet/base/copyable.h
+
+..//tinynet/base/noncopyable.h
+
+..//tinynet/base/utils.h
+tinynet/base/copyable.h
+../tinynet/base/tinynet/base/copyable.h
+tinynet/base/noncopyable.h
+../tinynet/base/tinynet/base/noncopyable.h
+assert.h
+-
+stdio.h
+-
+string.h
+-
+string
+-
+
+/root/code/tinynet/tinynet/base/tests/Thread_test.cc
+tinynet/base/Thread.h
+/root/code/tinynet/tinynet/base/tests/tinynet/base/Thread.h
+iostream
+-
+
