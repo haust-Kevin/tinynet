@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-19 16:51:49
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-21 20:17:43
+ * @LastEditTime: 2021-02-22 20:21:30
  * @FilePath: /tinynet/tinynet/net/Poller.h
  */
 
@@ -10,7 +10,7 @@
 
 #include "tinynet/base/Timestamp.h"
 #include "tinynet/base/utils.h"
-#include "tinynet/net/EventLoop.h"
+// #include "tinynet/net/EventLoop.h"
 
 #include <map>
 #include <vector>
@@ -20,6 +20,7 @@ namespace tinynet
     namespace net
     {
         class Channel;
+        class EventLoop;
 
         class Poller : noncopyable
         {
@@ -38,6 +39,7 @@ namespace tinynet
             {
                 _ownerLoop->assertInLoopThread();
             }
+            static Poller *newDefaultPoller(EventLoop *loop);
 
         protected:
             using ChannelMap = std::map<int, Channel *>;

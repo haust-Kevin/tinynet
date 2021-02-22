@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-21 20:22:07
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-21 21:39:44
+ * @LastEditTime: 2021-02-22 19:00:33
  * @FilePath: /tinynet/tinynet/net/Channel.h
  */
 
@@ -12,11 +12,14 @@
 #include "tinynet/base/utils.h"
 
 #include <functional>
+#include <memory>
 
 namespace tinynet
 {
     namespace net
     {
+        class EventLoop;
+
         class Channel : noncopyable
         {
         private:
@@ -38,12 +41,26 @@ namespace tinynet
             void setCloseCallback(EventCallback cb) { _closeCb = cb; }
             void setErrorCallback(EventCallback cb) { _errorCb = cb; }
 
+            void enableReading();
+            void disableReading();
+            void enableWriting();
+            void disableWriting();
+            void disableAll();
+
+            bool isWriting() const { return _events & __WriteEvent; }
+            bool isReading() const { return _events & __ReadEvent; }
+            bool isNoneEvent() const { return _events ^ __NoneEvent; }
+
             void tie(const std::shared_ptr<void> &obj);
+            void remove();
 
             int fd() const { return _fd; }
-            int events() { return _events; }
+            int events() const { return _events; }
+            int index() const { return _index; }
             void setREvents(int revent) { _revents = revent; }
-            bool isNoneEvent() const {}
+            void setIndex(int idx) { _index = idx; }
+
+            EventLoop *ownerLoop() { return _loop; }
 
         private:
             void update();
@@ -64,7 +81,7 @@ namespace tinynet
             ReadEventCallback _readCb;
             EventCallback _writeCb;
             EventCallback _closeCb;
-            EventCallback errorCb;
+            EventCallback _errorCb;
         };
     }
 }
