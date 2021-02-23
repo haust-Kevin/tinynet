@@ -1,13 +1,16 @@
 /*
  * @Date: 2021-02-21 10:09:54
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-22 20:20:09
+ * @LastEditTime: 2021-02-23 21:39:08
  * @FilePath: /tinynet/tinynet/net/EventLoop.cc
  */
 
 #include "tinynet/net/EventLoop.h"
 #include "tinynet/net/Channel.h"
 #include "tinynet/net/Poller.h"
+#include "tinynet/net/SocketsOps.h"
+
+#include <algorithm>
 
 #include <signal.h>
 #include <sys/eventfd.h>
@@ -20,6 +23,7 @@ using namespace tinynet::net;
 namespace
 {
     thread_local EventLoop *t_loopInThisThread = 0;
+    const int __PollTimeMs = 10000;
     int createEventFd()
     {
         int evtfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -66,42 +70,91 @@ EventLoop::~EventLoop()
 
 void EventLoop::loop()
 {
+    assert(!_looping);
+    assertInLoopThread();
+    _quit = false;
+    _looping = true;
+    while (!_quit)
+    {
+        _activeChannels.clear();
+        _pollReturnTime = _poller->poll(__PollTimeMs, &_activeChannels);
+        ++_iteration;
+        _eventHandling = true;
+        for (Channel *channel : _activeChannels)
+        {
+            _currentActiveChannel = channel;
+            _currentActiveChannel->handleEvent(_pollReturnTime);
+        }
+        _currentActiveChannel = nullptr;
+        _eventHandling = false;
+        doPendingFunctors();
+    }
+    _looping = false;
 }
 
 void EventLoop::quit()
 {
-}
-
-void EventLoop::wakeup()
-{
+    _quit = true;
+    if (!isInLoopThread())
+    {
+        wakeup();
+    }
 }
 
 void EventLoop::updateChannel(Channel *channel)
 {
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    _poller->updateChannel(channel);
 }
 
 void EventLoop::removeChannel(Channel *channel)
 {
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    if (_eventHandling)
+    {
+        assert(_currentActiveChannel == channel ||
+               find(_activeChannels.begin(), _activeChannels.end(), channel) == _activeChannels.end());
+    }
+    _poller->removeChannel(channel);
 }
 
 bool EventLoop::hasChannel(Channel *channel)
 {
-    //
-    return 0;
+    assert(channel->ownerLoop() == this);
+    assertInLoopThread();
+    return _poller->hasChannel(channel);
 }
 
 void EventLoop::runInLoop(Functor func)
 {
+    if (isInLoopThread())
+    {
+        func();
+    }
+    else
+    {
+        queueInLoop(func);
+    }
 }
 
 void EventLoop::queueInLoop(Functor func)
 {
+    {
+        lock_guard<mutex> guard(_mtx);
+        _pendingFunctors.push_back(func);
+    }
+    if (!isInLoopThread() || _callingPendingFunctors)
+    {
+        wakeup();
+    }
 }
 
 size_t EventLoop::queueSize() const
 {
-    //
-    return 0;
+    lock_guard<mutex> guard(_mtx);
+    return _pendingFunctors.size();
 }
 
 /*
@@ -125,10 +178,31 @@ EventLoop *EventLoop::getEventLoopOfCurrentThread()
     return t_loopInThisThread;
 }
 
-void EventLoop::handleRead()
+void EventLoop::wakeup()
 {
+    uint64_t one = 1;
+    size_t n = sockets::write(_wakeupFd, &one, sizeof one);
+    assert(n == sizeof one);
 }
 
-void EventLoop::doPendingFunctorsd()
+void EventLoop::handleRead()
 {
+    uint64_t one = 1;
+    size_t n = sockets::read(_wakeupFd, &one, sizeof one);
+    assert(n == sizeof one);
+}
+
+void EventLoop::doPendingFunctors()
+{
+    std::vector<Functor> functors;
+    _callingPendingFunctors = true;
+    {
+        lock_guard<mutex> guard(_mtx);
+        functors.swap(_pendingFunctors);
+    }
+    for (auto func : functors)
+    {
+        func();
+    }
+    _callingPendingFunctors = false;
 }

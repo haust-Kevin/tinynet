@@ -5,6 +5,8 @@ set(NET_SRCS
     Poller.cc
     Channel.cc
     EventLoop.cc
+    EventLoopThread.cc
+    EventLoopThreadPool.cc
 
 
     poller/DefaultPoller.cc

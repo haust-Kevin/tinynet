@@ -1,13 +1,14 @@
 /*
  * @Date: 2021-02-21 10:10:00
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-22 20:23:14
+ * @LastEditTime: 2021-02-22 20:38:53
  * @FilePath: /tinynet/tinynet/net/EventLoop.h
  */
 
 #ifndef TINYNET_NET_EVENTLOOP_H
 #define TINYNET_NET_EVENTLOOP_H
 
+#include "tinynet/base/Timestamp.h"
 #include "tinynet/base/utils.h"
 
 #include <atomic>
@@ -57,7 +58,7 @@ namespace tinynet
 
         private:
             void handleRead();
-            void doPendingFunctorsd();
+            void doPendingFunctors();
 
         private:
             bool _looping;
@@ -74,7 +75,7 @@ namespace tinynet
             ChannelList _activeChannels;
             Channel *_currentActiveChannel;
             mutable std::mutex _mtx;
-            std::vector<Functor> pendingFunctors;
+            std::vector<Functor> _pendingFunctors;
         };
     }
 }
