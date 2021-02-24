@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-19 17:50:36
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-19 20:46:57
+ * @LastEditTime: 2021-02-24 12:29:45
  * @FilePath: /tinynet/tinynet/net/SocketsOps.cc
  */
 
@@ -9,6 +9,7 @@
 
 #include <fcntl.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <unistd.h>
 
 using namespace tinynet;
@@ -33,16 +34,16 @@ int sockets::createNonblocking()
 
 int sockets::connect(int sockfd, const struct sockaddr_in *addr)
 {
-    return ::connect(sockfd, 
-                    sockaddr_cast(addr), 
-                    static_cast<socklen_t>(sizeof( struct sockaddr_in)));
+    return ::connect(sockfd,
+                     sockaddr_cast(addr),
+                     static_cast<socklen_t>(sizeof(struct sockaddr_in)));
 }
 
 void sockets::bind(int sockfd, const struct sockaddr_in *addr)
 {
     int ret = ::bind(sockfd,
                      sockaddr_cast(addr),
-                     static_cast<socklen_t>(sizeof( struct sockaddr_in)));
+                     static_cast<socklen_t>(sizeof(struct sockaddr_in)));
     assert(sockfd >= 0);
 }
 
@@ -54,7 +55,7 @@ void sockets::listen(int sockfd)
 
 int sockets::accept(int sockfd, struct sockaddr_in *addr)
 {
-    socklen_t addrlen = static_cast<socklen_t>(sizeof( struct sockaddr_in));
+    socklen_t addrlen = static_cast<socklen_t>(sizeof(struct sockaddr_in));
     int connfd = ::accept(sockfd, sockaddr_cast(addr), &addrlen);
     setNonBlockAndCloseOnExec(connfd);
     assert(sockfd >= 0);
@@ -69,6 +70,10 @@ size_t sockets::read(int sockfd, void *buff, size_t count)
 size_t sockets::write(int sockfd, const void *buff, size_t count)
 {
     return ::write(sockfd, buff, count);
+}
+size_t sockets::readv(int sockfd, const struct iovec *iov, int iocnt)
+{
+    return ::readv(sockfd, iov, iocnt);
 }
 
 void sockets::close(int sockfd)

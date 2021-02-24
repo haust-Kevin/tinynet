@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-19 17:50:47
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-20 20:33:40
+ * @LastEditTime: 2021-02-24 12:27:56
  * @FilePath: /tinynet/tinynet/net/SocketsOps.h
  */
 
@@ -28,6 +28,7 @@ namespace tinynet
             void close(int sockfd);
             void shutdownWrite(int sockfd);
             size_t read(int sockfd, void *buff, size_t count);
+            size_t readv(int sockfd, const struct iovec *iov, int iocnt);
             size_t write(int sockfd, const void *buff, size_t count);
 
             const struct sockaddr *sockaddr_cast(const struct sockaddr_in *addr);
