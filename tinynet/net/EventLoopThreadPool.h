@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-23 23:03:00
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-23 23:24:28
+ * @LastEditTime: 2021-02-24 09:53:35
  * @FilePath: /tinynet/tinynet/net/EventLoopThreadPool.h
  */
 
@@ -10,6 +10,8 @@
 
 #include "tinynet/base/utils.h"
 
+#include <functional>
+#include <memory>
 #include <vector>
 
 namespace tinynet
@@ -34,11 +36,11 @@ namespace tinynet
             std::vector<EventLoop *> getAllLoops();
 
             void setThreadNum(int threadNum) { _threadNum = threadNum; }
-            void started() const { return _started; }
-            string &name() const { return _name; }
+            bool started() const { return _started; }
+            const string &name() const { return _name; }
 
         private:
-            EventLoop *_loop;
+            EventLoop *_mainLoop;
             string _name;
             bool _started;
             int _threadNum;
