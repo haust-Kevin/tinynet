@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-24 10:01:57
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-24 17:24:03
+ * @LastEditTime: 2021-02-25 09:10:52
  * @FilePath: /tinynet/tinynet/net/TcpConnection.cc
  */
 
@@ -146,14 +146,64 @@ void TcpConnection::connectDestroyed()
 
 void TcpConnection::handleRead(Timestamp receiveTime)
 {
+    _loop->assertInLoopThread();
+    int savedErrno = 0;
+    size_t n = _inputBuffer.readFd(_channel->fd(), &savedErrno);
+    if (n > 0)
+    {
+        _messageCallback(shared_from_this(), &_inputBuffer, receiveTime);
+    }
+    else if (n == 0)
+    {
+        handleClose();
+    }
+    else
+    {
+        errno = savedErrno;
+        handleError();
+    }
 }
 
 void TcpConnection::handleWrite()
 {
+    _loop->assertInLoopThread();
+    if (_channel->isWriting())
+    {
+        size_t n = sockets::write(_channel->fd(),
+                                  _outputBuffer.peek(),
+                                  _outputBuffer.readableBytes());
+        if (n > 0)
+        {
+            _outputBuffer.retrieve(n);
+            if (_outputBuffer.readableBytes() == 0)
+            {
+                _channel->disableWriting();
+                if (_writeCompleteCallback)
+                {
+                    _loop->queueInLoop(bind(_writeCompleteCallback, shared_from_this()));
+                }
+                if (_state == StateE::__Disconnecting)
+                {
+                    shutdownInLoop();
+                }
+            }
+        }
+        else
+        {
+            // TODO log
+        }
+    }
 }
 
 void TcpConnection::handleClose()
 {
+    _loop->assertInLoopThread();
+    assert(_state == StateE::__Connected || _state == StateE::__Disconnecting);
+    setState(StateE::__Disconnected);
+    _channel->disableAll();
+    TcpConnectionPtr guardThis(shared_from_this());
+    _connectionCallback(guardThis);
+    _closeCallback(guardThis);
 }
 
 void TcpConnection::handleError()

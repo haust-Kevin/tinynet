@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-24 13:22:33
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-24 15:45:19
+ * @LastEditTime: 2021-02-25 08:55:19
  * @FilePath: /tinynet/tinynet/net/Callbacks.h
  */
 
@@ -27,12 +27,12 @@ namespace tinynet
         using ConnectionCallback = std::function<void(const TcpConnectionPtr &)>;
         using CloseCallback = std::function<void(const TcpConnectionPtr &)>;
         using WriteCompleteCallback = std::function<void(const TcpConnectionPtr &)>;
-        using MessageCallback = std::function<void(TcpConnectionPtr &, Buffer *, Timestamp)>;
-        // TODO : 高流量处理
+        using MessageCallback = std::function<void(const TcpConnectionPtr &, Buffer *, Timestamp)>;
+
         using HighWaterMarkCallback = std::function<void(const TcpConnectionPtr &, size_t)>;
 
         void defaultConnectionCallback(const TcpConnectionPtr &conn);
-        void defaultMessageCallback(TcpConnectionPtr &conn, Buffer *buffer, Timestamp receiveTime);
+        void defaultMessageCallback(const TcpConnectionPtr &conn, Buffer *buffer, Timestamp receiveTime);
     } // namespace net
 
 } // namespace tinynet
