@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-20 19:50:34
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-21 09:50:09
+ * @LastEditTime: 2021-02-25 10:26:45
  * @FilePath: /tinynet/tinynet/net/InetAddress.h
  */
 
@@ -24,6 +24,7 @@ namespace tinynet
             explicit InetAddress(const struct sockaddr_in &addr);
 
             const struct sockaddr_in *getSockAddr() const;
+            string toIpPort() const;
 
         private:
             struct sockaddr_in _addr;

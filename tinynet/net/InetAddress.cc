@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-20 19:50:04
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-20 21:11:57
+ * @LastEditTime: 2021-02-25 10:27:04
  * @FilePath: /tinynet/tinynet/net/InetAddress.cc
  */
 
@@ -37,4 +37,11 @@ InetAddress::InetAddress(const struct sockaddr_in &addr)
 const struct sockaddr_in *InetAddress::getSockAddr() const
 {
     return &_addr;
+}
+
+string InetAddress::toIpPort() const
+{
+    char buff[64] = "";
+    sockets::toIpPort(buff, sizeof buff, getSockAddr());
+    return buff;
 }

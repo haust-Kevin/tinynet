@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-24 13:22:33
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-25 08:55:19
+ * @LastEditTime: 2021-02-25 17:02:37
  * @FilePath: /tinynet/tinynet/net/Callbacks.h
  */
 
@@ -17,6 +17,7 @@ namespace tinynet
 {
     using std::placeholders::_1;
     using std::placeholders::_2;
+    using std::placeholders::_3;
 
     namespace net
     {
