@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libtinynet_base.a  CMakeFiles/tinynet_base.dir/Thread.cc.o CMakeFiles/tinynet_base.dir/ThreadPool.cc.o CMakeFiles/tinynet_base.dir/Timestamp.cc.o
-/usr/bin/ranlib ../../lib/libtinynet_base.a
