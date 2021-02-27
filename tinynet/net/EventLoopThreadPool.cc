@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-23 23:02:47
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-24 09:55:58
+ * @LastEditTime: 2021-02-26 13:11:46
  * @FilePath: /tinynet/tinynet/net/EventLoopThreadPool.cc
  */
 
@@ -26,7 +26,7 @@ EventLoopThreadPool::~EventLoopThreadPool()
 
 void EventLoopThreadPool::start(const ThreadInitCallback &cb)
 {
-    assert(_started);
+    assert(!_started);
     _mainLoop->assertInLoopThread();
     _started = true;
     for (int i = 0; i < _threadNum; i++)

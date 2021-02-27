@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-25 09:55:56
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-25 17:06:51
+ * @LastEditTime: 2021-02-27 14:26:01
  * @FilePath: /tinynet/tinynet/net/TcpServer.h
  */
 
@@ -24,12 +24,6 @@ namespace tinynet
 
         class TcpServer : noncopyable
         {
-            enum class Option
-            {
-                __NoReusePort,
-                __ReusePort
-            };
-
             using ThreadInitCallback = std::function<void(EventLoop *)>;
             using ConnectionMap = std::map<string, TcpConnectionPtr>;
 
@@ -37,7 +31,7 @@ namespace tinynet
             TcpServer(EventLoop *loop,
                       const InetAddress &addr,
                       const string &name,
-                      Option option = Option::__NoReusePort);
+                      bool reusePort = false);
             ~TcpServer();
 
             void setThreadNum(int threadNum);

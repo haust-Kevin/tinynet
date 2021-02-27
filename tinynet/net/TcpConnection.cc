@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-24 10:01:57
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-25 09:10:52
+ * @LastEditTime: 2021-02-27 16:11:54
  * @FilePath: /tinynet/tinynet/net/TcpConnection.cc
  */
 
@@ -31,16 +31,20 @@ TcpConnection::TcpConnection(EventLoop *loop,
       _peerAddr(peerAddr),
       _highWaterMark(64 * 1024 * 1024)
 {
-    _channel->setReadCallback(bind(&TcpConnection::handleRead, this, _1));
-    _channel->setWriteCallback(bind(&TcpConnection::handleWrite, this));
-    _channel->setCloseCallback(bind(&TcpConnection::handleClose, this));
-    _channel->setErrorCallback(bind(&TcpConnection::handleError, this));
-    _socket->setKeepAlive(true);
 }
 
 TcpConnection::~TcpConnection()
 {
     assert(_state == StateE::__Disconnected);
+}
+
+void TcpConnection::init()
+{
+    _channel->setReadCallback(bind(&TcpConnection::handleRead, shared_from_this(), _1));
+    _channel->setWriteCallback(bind(&TcpConnection::handleWrite, shared_from_this()));
+    _channel->setCloseCallback(bind(&TcpConnection::handleClose, shared_from_this()));
+    _channel->setErrorCallback(bind(&TcpConnection::handleError, shared_from_this()));
+    _socket->setKeepAlive(true);
 }
 
 void TcpConnection::send(const void *msg, size_t len)
@@ -54,7 +58,7 @@ void TcpConnection::send(const void *msg, size_t len)
         else
         {
             void (TcpConnection::*fp)(const void *msg, size_t len) = &TcpConnection::sendInLoop;
-            _loop->runInLoop(bind(fp, this, msg, len));
+            _loop->runInLoop(bind(fp, shared_from_this(), msg, len));
         }
     }
 }
@@ -76,7 +80,7 @@ void TcpConnection::send(Buffer *bufferMsg)
         else
         {
             void (TcpConnection::*fp)(const string &msg) = &TcpConnection::sendInLoop;
-            _loop->runInLoop(bind(fp, this, bufferMsg->extractAll()));
+            _loop->runInLoop(bind(fp, shared_from_this(), bufferMsg->extractAll()));
         }
     }
 }
@@ -86,7 +90,7 @@ void TcpConnection::shutdown()
     if (_state == StateE::__Connected)
     {
         setState(StateE::__Disconnecting);
-        _loop->runInLoop(bind(&TcpConnection::shutdownInLoop, this));
+        _loop->runInLoop(bind(&TcpConnection::shutdownInLoop, shared_from_this()));
     }
 }
 
@@ -115,12 +119,12 @@ void TcpConnection::setTcpNoDelay(bool on)
 
 void TcpConnection::startRead()
 {
-    _loop->runInLoop(bind(&TcpConnection::startReadInLoop, this));
+    _loop->runInLoop(bind(&TcpConnection::startReadInLoop, shared_from_this()));
 }
 
 void TcpConnection::stopRead()
 {
-    _loop->runInLoop(bind(&TcpConnection::stopReadInLoop, this));
+    _loop->runInLoop(bind(&TcpConnection::stopReadInLoop, shared_from_this()));
 }
 
 void TcpConnection::connectEstablished()
@@ -130,6 +134,7 @@ void TcpConnection::connectEstablished()
     setState(StateE::__Connected);
     _channel->tie(shared_from_this());
     _channel->enableReading();
+    _connectionCallback(shared_from_this());
 }
 
 void TcpConnection::connectDestroyed()
@@ -208,7 +213,7 @@ void TcpConnection::handleClose()
 
 void TcpConnection::handleError()
 {
-    // FIXME log
+    // TODO log
     assert(0);
 }
 
@@ -323,4 +328,13 @@ const char *TcpConnection::stateToString() const
         assert(0);
     }
     return "Unknown state";
+}
+
+void tinynet::net::defaultConnectionCallback(const TcpConnectionPtr &conn)
+{
+}
+
+void tinynet::net::defaultMessageCallback(const TcpConnectionPtr &conn, Buffer *buffer, Timestamp receiveTime)
+{
+    buffer->retrieveAll();
 }

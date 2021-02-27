@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-25 09:56:06
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-25 16:23:34
+ * @LastEditTime: 2021-02-27 15:54:50
  * @FilePath: /tinynet/tinynet/net/TcpServer.cc
  */
 
@@ -17,11 +17,11 @@ using namespace tinynet::net;
 TcpServer::TcpServer(EventLoop *loop,
                      const InetAddress &addr,
                      const string &name,
-                     Option option)
+                     bool reusePort)
     : _loop(loop),
       _ipPort(addr.toIpPort()),
       _name(name),
-      _acceptor(new Acceptor(loop, addr, option == Option::__ReusePort)),
+      _acceptor(new Acceptor(loop, addr, reusePort)),
       _threadPool(new EventLoopThreadPool(loop, name)),
       _connectionCallback(defaultConnectionCallback),
       _messageCallback(defaultMessageCallback),
@@ -43,7 +43,7 @@ TcpServer::~TcpServer()
 
 void TcpServer::setThreadNum(int threadNum)
 {
-    assert(0 < threadNum);
+    assert(0 <= threadNum);
     _threadPool->setThreadNum(threadNum);
 }
 
@@ -68,6 +68,7 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr)
     string connName = _name + buff;
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
     TcpConnectionPtr conn(new TcpConnection(loop, connName, sockfd, localAddr, peerAddr));
+    conn->init();
     _connections[connName] = conn;
     conn->setConnectionCallback(_connectionCallback);
     conn->setMessageCallback(_messageCallback);

@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-25 16:30:39
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-25 17:15:36
+ * @LastEditTime: 2021-02-27 14:30:56
  * @FilePath: /tinynet/tinynet/net/tests/TcpServer_test.cc
  */
 
@@ -9,17 +9,19 @@
 #include "tinynet/net/InetAddress.h"
 #include "tinynet/net/TcpServer.h"
 
+#include <iostream>
+
 using namespace std;
 using namespace tinynet;
 using namespace tinynet::net;
 
 class EchoServer
 {
-    static const int __ThreadNum = 3;
+    static const int __ThreadNum = 1;
 
 public:
     EchoServer(EventLoop *loop, const InetAddress &listenAddr)
-        : _loop(loop), _server(loop, listenAddr, "EchoServer")
+        : _loop(loop), _server(loop, listenAddr, "EchoServer", 1)
     {
         _server.setConnectionCallback(bind(&EchoServer::onConnection, this, _1));
         _server.setMessageCallback(bind(&EchoServer::onMessage, this, _1, _2, _3));
@@ -39,6 +41,7 @@ private:
 
     void onMessage(const TcpConnectionPtr &conn, Buffer *buffer, Timestamp time)
     {
+        static long long count = 0;
         string msg(buffer->extractAll());
         if (msg == "exit\n")
         {
@@ -47,14 +50,14 @@ private:
         }
         if (msg == "quit\n")
         {
-            // _loop->quit();
+            _loop->quit();
         }
         for (auto &c : msg)
         {
             c = toupper(c);
         }
-
         conn->send(msg);
+        std::cout << "[" << ++count << "]" << std::endl;
     }
 
 private:
@@ -65,7 +68,7 @@ private:
 int main(int argc, char const *argv[])
 {
     EventLoop loop;
-    InetAddress listenAddr(8880);
+    InetAddress listenAddr(stoi(argv[1]));
     EchoServer server(&loop, listenAddr);
     server.start();
     loop.loop();

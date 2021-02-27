@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-24 10:02:09
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-24 17:06:33
+ * @LastEditTime: 2021-02-27 14:52:50
  * @FilePath: /tinynet/tinynet/net/TcpConnection.h
  */
 
@@ -25,7 +25,7 @@ namespace tinynet
         class Channel;
 
         class TcpConnection : noncopyable,
-                              std::enable_shared_from_this<TcpConnection>
+                              public std::enable_shared_from_this<TcpConnection>
         {
             enum class StateE
             {
@@ -36,6 +36,10 @@ namespace tinynet
             };
 
         public:
+            std::shared_ptr<TcpConnection> getptr()
+            {
+                return shared_from_this();
+            }
             TcpConnection(EventLoop *loop,
                           const string &name,
                           int sockfd,
@@ -43,6 +47,7 @@ namespace tinynet
                           const InetAddress &peerAddr);
             ~TcpConnection();
 
+            void init();
             void send(const void *msg, size_t len);
             void send(const string &msg);
             void send(Buffer *bufferMsg); /// swap bufferMsg's data
@@ -90,7 +95,11 @@ namespace tinynet
             void stopReadInLoop();
             const char *stateToString() const;
 
-            void setState(StateE state) { _state = state; }
+            void setState(StateE state)
+            {
+                _state = state;
+                printf("%s\n", stateToString());
+            }
 
         private:
             EventLoop *_loop;

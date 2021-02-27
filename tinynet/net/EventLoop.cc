@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-21 10:09:54
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-25 17:17:55
+ * @LastEditTime: 2021-02-26 13:07:16
  * @FilePath: /tinynet/tinynet/net/EventLoop.cc
  */
 
@@ -52,7 +52,6 @@ EventLoop::EventLoop()
       _wakeupFd(createEventFd()),
       _wakeupChannel(new Channel(this, _wakeupFd)),
       _currentActiveChannel(nullptr)
-
 {
     assert(!t_loopInThisThread);
     t_loopInThisThread = this;

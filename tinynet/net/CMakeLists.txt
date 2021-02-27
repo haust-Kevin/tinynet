@@ -20,4 +20,4 @@ set(NET_SRCS
 
 add_library(tinynet_net ${NET_SRCS})
 
-target_link_libraries(tinynet_net pthread)
+target_link_libraries(tinynet_net pthread tinynet_base)
