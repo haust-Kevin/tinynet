@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-21 20:22:07
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-22 19:00:33
+ * @LastEditTime: 2021-02-28 11:45:12
  * @FilePath: /tinynet/tinynet/net/Channel.h
  */
 
@@ -49,7 +49,7 @@ namespace tinynet
 
             bool isWriting() const { return _events & __WriteEvent; }
             bool isReading() const { return _events & __ReadEvent; }
-            bool isNoneEvent() const { return _events ^ __NoneEvent; }
+            bool isNoneEvent() const { return _events == __NoneEvent; }
 
             void tie(const std::shared_ptr<void> &obj);
             void remove();

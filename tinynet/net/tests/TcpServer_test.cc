@@ -1,7 +1,7 @@
 /*
  * @Date: 2021-02-25 16:30:39
  * @LastEditors: Kevin
- * @LastEditTime: 2021-02-27 14:30:56
+ * @LastEditTime: 2021-02-28 11:35:42
  * @FilePath: /tinynet/tinynet/net/tests/TcpServer_test.cc
  */
 
@@ -68,7 +68,7 @@ private:
 int main(int argc, char const *argv[])
 {
     EventLoop loop;
-    InetAddress listenAddr(stoi(argv[1]));
+    InetAddress listenAddr(8880);
     EchoServer server(&loop, listenAddr);
     server.start();
     loop.loop();
